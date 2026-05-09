@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panchakarma Patient Management and Therapy Scheduling Software</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#care-board" aria-label="Panchakarma Care OS home">
+      <span class="brand-mark" aria-hidden="true">PK</span>
+      <span>
+        <span class="eyebrow">Panchakarma Care OS</span>
+        <span class="brand-title">Patient Management and Therapy Scheduling</span>
+      </span>
+    </a>
+    <nav class="topnav" aria-label="Primary">
+      <a href="#scheduler">Scheduler</a>
+      <a href="#notifications">Precautions</a>
+      <a href="#progress">Tracking</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="care-board" id="care-board" aria-label="Care operations overview">
+      <div class="care-copy">
+        <span class="status-pill"><span class="status-dot"></span> Live clinic board</span>
+        <h1>Panchakarma therapy operations, patient feedback, and recovery tracking in one workspace.</h1>
+        <p>
+          Plan therapy sequences, align practitioners, send pre- and post-procedure precautions, and adjust care from patient response data.
+        </p>
+        <div class="metric-strip" aria-label="Clinic metrics">
+          <article>
+            <span id="metricSessions">0</span>
+            <p>Upcoming sessions</p>
+          </article>
+          <article>
+            <span id="metricReminders">0%</span>
+            <p>Reminder coverage</p>
+          </article>
+          <article>
+            <span id="metricRecovery">0%</span>
+            <p>Recovery trend</p>
+          </article>
+        </div>
+      </div>
+      <div class="care-visual">
+        <img src="assets/panchakarma-therapy-room.png" alt="Modern Panchakarma therapy room with a digital scheduling tablet">
+        <div class="next-session" id="nextSessionCard" aria-live="polite">
+          <span class="eyebrow">Next Session</span>
+          <strong>Loading schedule</strong>
+          <span>Preparing care board</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="workspace" id="scheduler" aria-label="Therapy scheduler workspace">
+      <aside class="panel patient-panel">
+        <div class="panel-heading">
+          <span class="eyebrow">Patients</span>
+          <h2>Care Queue</h2>
+        </div>
+        <div class="patient-list" id="patientList"></div>
+      </aside>
+
+      <section class="panel schedule-panel">
+        <div class="panel-heading split">
+          <div>
+            <span class="eyebrow">Automated Scheduling</span>
+            <h2>Therapy Planner</h2>
+          </div>
+          <div class="segmented" role="group" aria-label="Schedule view">
+            <button type="button" class="active" data-view="patient">Patient</button>
+            <button type="button" data-view="practitioner">Practitioner</button>
+          </div>
+        </div>
+
+        <form class="schedule-form" id="scheduleForm">
+          <label>
+            Patient
+            <select id="patientSelect" name="patient"></select>
+          </label>
+          <label>
+            Practitioner
+            <select id="practitionerSelect" name="practitioner"></select>
+          </label>
+          <label>
+            Therapy Protocol
+            <select id="planSelect" name="plan"></select>
+          </label>
+          <label>
+            Start Date
+            <input id="startDate" name="startDate" type="date">
+          </label>
+          <label>
+            Start Time
+            <input id="startTime" name="startTime" type="time">
+          </label>
+          <label>
+            Sessions
+            <input id="sessionCountInput" name="sessions" type="number" min="3" max="21" value="7">
+          </label>
+          <label>
+            Frequency
+            <select id="frequencySelect" name="frequency">
+              <option value="1">Daily</option>
+              <option value="2">Alternate days</option>
+              <option value="3">Every third day</option>
+            </select>
+          </label>
+          <fieldset class="channel-fieldset">
+            <legend>Notification Channels</legend>
+            <label><input type="checkbox" name="channel" value="In-app" checked> In-app</label>
+            <label><input type="checkbox" name="channel" value="SMS" checked> SMS</label>
+            <label><input type="checkbox" name="channel" value="Email" checked> Email</label>
+          </fieldset>
+          <button class="primary-action" type="submit">Generate Schedule</button>
+        </form>
+
+        <div class="schedule-toolbar">
+          <div>
+            <span class="eyebrow">Upcoming</span>
+            <h3 id="sessionSummary">0 sessions scheduled</h3>
+          </div>
+          <div class="filter-chips" role="group" aria-label="Filter sessions">
+            <button type="button" class="active" data-filter="all">All</button>
+            <button type="button" data-filter="today">Today</button>
+            <button type="button" data-filter="feedback">Feedback</button>
+          </div>
+        </div>
+        <div class="session-list" id="sessionList" aria-live="polite"></div>
+      </section>
+
+      <aside class="panel progress-panel" id="progress">
+        <div class="panel-heading">
+          <span class="eyebrow">Real-Time Tracking</span>
+          <h2>Recovery Progress</h2>
+        </div>
+
+        <div class="progress-overview">
+          <div class="progress-ring" id="progressRing" style="--progress: 72">
+            <span id="progressValue">72%</span>
+          </div>
+          <div>
+            <strong id="progressPatient">Patient response</strong>
+            <p id="progressNote">Current protocol progress</p>
+          </div>
+        </div>
+
+        <div class="chart-wrap">
+          <canvas id="trendChart" width="640" height="280" aria-label="Patient response trend chart"></canvas>
+        </div>
+
+        <div class="milestone-list" id="milestoneList"></div>
+
+        <form class="feedback-form" id="feedbackForm">
+          <div class="panel-heading compact">
+            <span class="eyebrow">Feedback Loop</span>
+            <h3>Session Response</h3>
+          </div>
+          <label>
+            Session
+            <select id="feedbackSession"></select>
+          </label>
+          <label>
+            Relief
+            <input id="reliefInput" type="range" min="0" max="10" value="7">
+          </label>
+          <label>
+            Sleep
+            <input id="sleepInput" type="range" min="0" max="10" value="7">
+          </label>
+          <label>
+            Digestion
+            <input id="digestionInput" type="range" min="0" max="10" value="6">
+          </label>
+          <label>
+            Side Effects
+            <input id="sideEffectInput" type="range" min="0" max="10" value="1">
+          </label>
+          <label>
+            Notes
+            <textarea id="feedbackNotes" rows="3" placeholder="Symptoms, side effects, or improvements"></textarea>
+          </label>
+          <button class="secondary-action" type="submit">Save Feedback</button>
+        </form>
+      </aside>
+    </section>
+
+    <section class="notification-console" id="notifications" aria-label="Procedure notification system">
+      <div class="panel-heading split">
+        <div>
+          <span class="eyebrow">Pre- and Post-Procedure Notification System</span>
+          <h2>Precaution Console</h2>
+        </div>
+        <div class="channel-pills" id="selectedChannels"></div>
+      </div>
+
+      <div class="notification-grid">
+        <article>
+          <span class="eyebrow">Selected Therapy</span>
+          <h3 id="selectedTherapy">No therapy selected</h3>
+          <p id="selectedMeta">Active schedule details.</p>
+        </article>
+        <article>
+          <span class="eyebrow">Before Procedure</span>
+          <ul id="preList"></ul>
+        </article>
+        <article>
+          <span class="eyebrow">After Procedure</span>
+          <ul id="postList"></ul>
+        </article>
+        <article>
+          <span class="eyebrow">Automated Alerts</span>
+          <div id="alertTimeline" class="alert-timeline"></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
